@@ -23,7 +23,7 @@ def handle_obstacle_path(distance, pattern):
 
 def handle_obstacle_random(px):
     px.forward(0)
-    # Scan left to right to check for clearest path
+    # Scan left and right to check for clearest path
     # Left distance (-35)
     px.set_cam_pan_angle(-35)
     left_distance = round(px.ultrasonic.read(), 0)
@@ -77,9 +77,7 @@ def handle_obstacle_random(px):
     else:
         print("backup")
         px.set_dir_servo_angle(0)
-        px.backward(POWER)
-        px.backward(POWER)
-        px.backward(POWER)
+        px.backward(POWER * 2)
         time.sleep(0.5)
 
     return
