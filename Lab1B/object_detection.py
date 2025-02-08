@@ -1,1 +1,1 @@
-# Object Detection
+# Object Detection - Must be done before navigation
