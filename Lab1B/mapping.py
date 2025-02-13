@@ -39,8 +39,8 @@ if __name__=='__main__':
         # starting in the middle bottom of grid
         origin = ((int)(GRID_SIZE/2), 0)
 
-        # angles from -MAX_ANGLE to MAX_ANGLE, incrementing by 5
-        angles = list(range(-MAX_ANGLE, MAX_ANGLE+1, 5)) 
+        # angles from -MAX_ANGLE to MAX_ANGLE, incrementing by INCREMENT
+        angles = list(range(-MAX_ANGLE, MAX_ANGLE+1, INCREMENT)) 
 
         for angle in angles:
             mu_distance = get_mu_distance(angle)
