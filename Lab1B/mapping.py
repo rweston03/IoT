@@ -1,4 +1,4 @@
-from picarx import Picarx
+#from picarx import Picarx
 from time import sleep
 import numpy as np
 import cv2
@@ -8,7 +8,7 @@ GRID_SIZE = 100
 MAX_DIFF = 5
 SLEEP_TIME = 0.1
 INCREMENT = 5
-px = Picarx()
+#px = Picarx()
 
 def print_map(origin, area):
     map_image = np.zeros((GRID_SIZE, GRID_SIZE, 3), dtype=np.uint8)
@@ -50,7 +50,7 @@ def mark_line(area, p1, p2):
                 e += dx
                 y1 += sy
 
-def get_mu_distance(angle):
+def get_mu_distance(px, angle):
     px.set_cam_pan_angle(angle)
     while True:
         readings = []
@@ -73,20 +73,20 @@ def get_mu_distance(angle):
         if np.std(readings) < 2:
             return np.mean(readings)
 
-if __name__=='__main__':
+def mapping_function(px, passedOrigin):
     try: 
         # assume that the entire space is open
         area = np.zeros((GRID_SIZE, GRID_SIZE), dtype=int)
 
         # starting in the middle bottom of grid
-        origin = ((int)(GRID_SIZE/2), 0)
+        origin = passedOrigin #((int)(GRID_SIZE/2), 0)
 
         # angles from -MAX_ANGLE to MAX_ANGLE, incrementing by INCREMENT
         angles = list(range(-MAX_ANGLE, MAX_ANGLE+1, INCREMENT)) 
         prev = (-1, -1)
 
         for angle in angles:
-            mu_distance = get_mu_distance(angle)
+            mu_distance = get_mu_distance(px, angle)
 
             # figure out how far the object is in the x and y directions
             rad_angle = angle * np.pi / 180.
@@ -109,3 +109,42 @@ if __name__=='__main__':
     finally:
         print("finished mapping")
         print_map(origin, area)
+        print(area)
+        return area
+
+# if __name__=='__main__':
+    # try: 
+        # assume that the entire space is open
+        # area = np.zeros((GRID_SIZE, GRID_SIZE), dtype=int)
+
+        # starting in the middle bottom of grid
+        # origin = ((int)(GRID_SIZE/2), 0)
+
+        # angles from -MAX_ANGLE to MAX_ANGLE, incrementing by INCREMENT
+        # angles = list(range(-MAX_ANGLE, MAX_ANGLE+1, INCREMENT)) 
+        # prev = (-1, -1)
+
+        # for angle in angles:
+            # mu_distance = get_mu_distance(angle)
+
+            # figure out how far the object is in the x and y directions
+            # rad_angle = angle * np.pi / 180.
+            # x = (int)(mu_distance*np.sin(rad_angle))
+            # y = (int)(mu_distance*np.cos(rad_angle))
+
+
+            # if the object is in the grid, mark grid space as 1
+            # (i, j) = (origin[0] + x, origin[1] + y)
+
+            # (x_coord, y_coord) = (i, GRID_SIZE - j - 1)
+
+            # if x_coord > 0 and x_coord < GRID_SIZE and y_coord > 0 and y_coord < GRID_SIZE:
+                # area[y_coord][x_coord] = 1
+                # if (prev[0] != -1):
+                    # mark_line(area, prev, (x_coord, y_coord))
+                # prev = (x_coord, y_coord)
+
+
+    # finally:
+        # print("finished mapping")
+        # print_map(origin, area)

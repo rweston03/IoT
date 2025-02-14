@@ -2,10 +2,13 @@
 
 # Adding code from Red Blob Games source "Implementation of A*" 
 # found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar, https://www.redblobgames.com/pathfinding/a-star/implementation.py
-# TODO: modify to match our maps when mapping step is done
 from typing import Protocol, Iterator, Tuple, TypeVar, Optional
 import collections
 import heapq
+
+T = TypeVar('T')
+Location = TypeVar('Location')
+GridLocation = Tuple[int, int]
 
 class PriorityQueue:
     def __init__(self):
@@ -20,22 +23,12 @@ class PriorityQueue:
     def get(self) -> T:
         return heapq.heappop(self.elements)[1]
 
-T = TypeVar('T')
-Location = TypeVar('Location')
-GridLocation = Tuple[int, int]
-
-class Graph(Protocol):
-    def neighbors(self, id: Location) -> list[Location]: pass
-    
-class WeightedGraph(Graph):
-    def cost(self, from_id: Location, to_id: Location) -> float: pass
-
 def heuristic(a: GridLocation, b: GridLocation) -> float:
     (x1, y1) = a
     (x2, y2) = b
     return abs(x1 - x2) + abs(y1 - y2)
 
-def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
+def a_star_search(graph: WeightedGraph, start: Location, goal: Location, gridSize: int):
     frontier = PriorityQueue()
     frontier.put(start, 0)
     came_from: dict[Location, Optional[Location]] = {}
@@ -45,12 +38,20 @@ def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
     
     while not frontier.empty():
         current: Location = frontier.get()
-        
+        neighbors = {}
+        # Calculate neighbors
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for d in directions:
+            if 0 <= d[0] + current[0] < gridSize and 0 <= d[1] + current[1] < gridSize:
+                newNeighbor = (d[0] + current[0], d[1] + current[1])
+                neighbors[newNeighbor] = graph[newNeighbor[0],newNeighbor[1]]
+            
+        print(neighbors)
         if current == goal:
             break
         
-        for next in graph.neighbors(current):
-            new_cost = cost_so_far[current] + graph.cost(current, next)
+        for next in neighbors:
+            new_cost = cost_so_far[current] + neighbors[next]
             if next not in cost_so_far or new_cost < cost_so_far[next]:
                 cost_so_far[next] = new_cost
                 priority = new_cost + heuristic(next, goal)
