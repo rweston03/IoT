@@ -1,8 +1,34 @@
 # Routing - can be done at same time as mapping, needs mapping for testing, needs to be done before navigation
 
 # Adding code from Red Blob Games source "Implementation of A*" 
-# found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar
+# found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar, https://www.redblobgames.com/pathfinding/a-star/implementation.py
 # TODO: modify to match our maps when mapping step is done
+from typing import Protocol, Iterator, Tuple, TypeVar, Optional
+import collections
+import heapq
+
+class PriorityQueue:
+    def __init__(self):
+        self.elements: list[tuple[float, T]] = []
+    
+    def empty(self) -> bool:
+        return not self.elements
+    
+    def put(self, item: T, priority: float):
+        heapq.heappush(self.elements, (priority, item))
+    
+    def get(self) -> T:
+        return heapq.heappop(self.elements)[1]
+
+T = TypeVar('T')
+Location = TypeVar('Location')
+GridLocation = Tuple[int, int]
+
+class Graph(Protocol):
+    def neighbors(self, id: Location) -> list[Location]: pass
+    
+class WeightedGraph(Graph):
+    def cost(self, from_id: Location, to_id: Location) -> float: pass
 
 def heuristic(a: GridLocation, b: GridLocation) -> float:
     (x1, y1) = a
