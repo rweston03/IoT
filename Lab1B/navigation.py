@@ -5,7 +5,7 @@ import json
 from mapping import get_grid, GRID_SIZE, px
 from routing import a_star_search 
 from object_detection import start_object_detection, detections
-import thre]ading
+import threading
 import time
 
 RESCAN_INTERVAL = 25
