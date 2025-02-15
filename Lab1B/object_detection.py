@@ -8,7 +8,7 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-#from utils import visualize
+from utils import visualize
 from picamera2 import Picamera2
 
 # Global variables to calculate FPS
@@ -41,6 +41,7 @@ def save_detections(detection_result_list):
             } 
             data.append(obj) 
     detections = data
+    # print(f"{detections=}")
 
 def run(model: str, max_results: int, score_threshold: float, 
         camera_id: int, width: int, height: int) -> None:
@@ -106,7 +107,7 @@ def run(model: str, max_results: int, score_threshold: float,
                     font_size, text_color, font_thickness, cv2.LINE_AA)
 
         if detection_result_list:
-            #current_frame = visualize(current_frame, detection_result_list[0])
+            current_frame = visualize(current_frame, detection_result_list[0])
             save_detections(detection_result_list)
             detection_frame = current_frame
             detection_result_list.clear()

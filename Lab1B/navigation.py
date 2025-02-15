@@ -8,13 +8,14 @@ from object_detection import start_object_detection, detections
 import threading
 import time
 
-RESCAN_INTERVAL = 25
+RESCAN_INTERVAL = 25 # number of steps to process before rescanning
 def main():
     try:
         threading.Thread(target=start_object_detection).start()
-        current_location = (GRID_SIZE - 1, 50)
+        current_location = (GRID_SIZE - 1, 50) # bottom middle of grid
         destination = (0, GRID_SIZE - 1) #Top right of grid
         orientation = "NORTH" # Bot always starts on the bottom middle of the grid facing north
+        time_last_stopped_for_stop_sign = 0
 
         # loop until reaches destination
         # on each loop, it gets a new grid where it is on the bottom middle of the grid and updates the 
@@ -32,17 +33,27 @@ def main():
                 print('reached the destination')
                 return
 
-            # Todo: need to see the result from object detection for when there is a stop sign and update the condition accordingly
-            # also need a variable that will make it so that it'll only stop for a stop sign once every  10 seconds to avoid stpping for
-            # the same stop sign  multiple times 
             if len(detections) > 0 and detections[0].label == "stop sign":
                 print("stop for x seconds")
                 
             # todo: need to improve the turning, it can't turn 90 degrees left/right on a dime so right now when  the path
-            # says to turn right it barely turns left/right at all which will cause it to stray from the path it's supposed to follow
+            # says to turn right it barely turns left/right at all which will cause it to stray a lot from the path it's supposed to follow
             # as a result, it will miss the destination
             px.set_dir_servo_angle(0)
             for step in steps_to_take:
+
+                # first check for stop sign
+                for  detection  in  detections:
+                    if detection.label == "stop sign":
+                        current_time = time.time()
+
+                        if abs(current_time - time_last_stopped_for_stop_sign) >= 10: # stopped for stop sign more than 10 seconds ago
+                            px.forward(0) # stop moving
+                            time.sleep(3) # wait 3 seconds
+                            px.forward(5) # start moving again
+                            time_last_stopped_for_stop_sign = current_time # update when the last time we stopped for stop sign was
+                            break
+
                 if orientation == "NORTH":
                     if step[0] == current_location[0] - 1:
                         print("north forward")
@@ -81,7 +92,10 @@ def main():
 
             # Need to reset the orientation so it is always facing north at the end of processing a batch of steps
             print(f'reorienting from {orientation=} to north')
-            # todo: need to check this to  see if this reorient is good enough or if it can be tuned better to make it end up reoriented in the same spot
+            px.set_dir_servo_angle(0)
+            # todo: need to fine tune this reorientation
+            # if it's oriented west, at the end of the if statement it should basically be facing 90 degrees to the right of where it started and in the same spot as where it started
+            # if it's oriented east, at the end of the if statement it should basically be facing 90 degrees to the left of where it started and in the same spot as where it started
             if orientation == "WEST":
                 # Move backwards, turn to the right, then go backwards again to try to end up in a similar spot
                 px.backward(5)
@@ -97,7 +111,7 @@ def main():
                 # Move backwards, turn to the left, then go backwards again to try to end up in a similar spot
                 px.backward(5)
                 time.sleep(0.5)
-                px.set_dir_servo_angle(30)
+                px.set_dir_servo_angle(-30)
                 px.forward(5)
                 time.sleep(0.5)
                 px.backward(5)
