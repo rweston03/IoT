@@ -29,6 +29,7 @@ def main():
             steps_to_take = path[0:RESCAN_INTERVAL]
             print(f"{steps_to_take}=")
             if len(steps_to_take) == 0:
+                print('reached the destination')
                 return
 
             # Todo: need to see the result from object detection for when there is a stop sign and update the condition accordingly
