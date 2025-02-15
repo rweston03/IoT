@@ -1,0 +1,12 @@
+[
+    {
+        "label": "person",
+        "score": 0.60546875,
+        "bounding_box": {
+            "xmin": 53,
+            "ymin": 2,
+            "width": 577,
+            "height": 474
+        }
+    }
+]

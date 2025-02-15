@@ -8,7 +8,7 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from utils import visualize
+#from utils import visualize
 from picamera2 import Picamera2
 
 # Global variables to calculate FPS
@@ -21,22 +21,26 @@ picam2.preview_configuration.align()
 picam2.configure("preview")
 picam2.start()
 
-def save_detections_to_json(detections, filename="detections.json"): 
+detections = []
+
+def save_detections(detection_result_list): 
     data = [] 
-    for detection in detections: 
-        obj = { 
-           "label": detection.categories[0].category_name, 
-           "score": detection.categories[0].score, 
-           "bounding_box": { 
-              "xmin": detection.bounding_box.origin_x, 
-              "ymin": detection.bounding_box.origin_y, 
-              "width": detection.bounding_box.width, 
-              "height": detection.bounding_box.height 
+    for detection_result in detection_result_list: 
+        # print(f'{detection_result=}')
+        for detection in detection_result.detections:
+            # print(f'{detection=}')
+            obj = { 
+                "label": detection.categories[0].category_name, 
+                "score": detection.categories[0].score, 
+                "bounding_box": { 
+                    "xmin": detection.bounding_box.origin_x, 
+                    "ymin": detection.bounding_box.origin_y, 
+                    "width": detection.bounding_box.width, 
+                    "height": detection.bounding_box.height 
+                } 
             } 
-        } 
-        data.append(obj) 
-        with open(filename, "w") as f: 
-           json.dump(data, f, indent=4) 
+            data.append(obj) 
+    detections = data
 
 def run(model: str, max_results: int, score_threshold: float, 
         camera_id: int, width: int, height: int) -> None:
@@ -102,13 +106,16 @@ def run(model: str, max_results: int, score_threshold: float,
                     font_size, text_color, font_thickness, cv2.LINE_AA)
 
         if detection_result_list:
-            current_frame = visualize(current_frame, detection_result_list[0])
-            save_detections_to_json(detection_result_list)
+            #current_frame = visualize(current_frame, detection_result_list[0])
+            save_detections(detection_result_list)
             detection_frame = current_frame
             detection_result_list.clear()
 
         if detection_frame is not None:
-            cv2.imshow('object_detection', detection_frame)
+            try:
+                cv2.imshow('object_detection', detection_frame)
+            except:
+                print(f' could not run imshow because there is no')
 
         # Stop the program if the ESC key is pressed.
         if cv2.waitKey(1) == 27:
@@ -119,7 +126,7 @@ def run(model: str, max_results: int, score_threshold: float,
     cv2.destroyAllWindows()
 
 
-def main():
+def start_object_detection():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -163,4 +170,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start_object_detection()
