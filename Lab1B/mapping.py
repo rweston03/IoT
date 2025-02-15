@@ -101,14 +101,14 @@ class SquareGrid:
     def passable(self, id: GridLocation) -> bool:
         return id not in self.walls
 
-    def neighbors(self, id: GridLocation) -> Iterator[GridLocation]:
+    def neighbors(self, id: GridLocation) -> list[GridLocation]:
         (x, y) = id
         neighbors = [(x+1, y), (x-1, y), (x, y-1), (x, y+1)] # E W N S
         # see "Ugly paths" section for an explanation:
         if (x + y) % 2 == 0: neighbors.reverse() # S N W E
         results = filter(self.in_bounds, neighbors)
         results = filter(self.passable, results)
-        return results
+        return list(results)
 
     def cost(self, start: GridLocation, end: GridLocation):
         return 1
