@@ -7,6 +7,8 @@ from routing import a_star_search
 from object_detection import start_object_detection, detections
 import threading
 import time
+
+RESCAN_INTERVAL = 25
 def main():
     try:
         threading.Thread(target=start_object_detection).start()
@@ -14,20 +16,23 @@ def main():
         destination = (0, 99)
         orientation = "NORTH" # Bot always starts on the bottom middle of the grid facing north
 
+        # loop until reaches destination
+        # on each loop, it gets a new grid where it is on the bottom middle of the grid and updates the 
+        # coordinates of the destination based on where it moved. it moves RESCAN_INTERVAL steps and then rescans
         while True:
             print(f"scanning...")
             origin = (GRID_SIZE - 1, 50)
-            # loop until reaches destination; see the 'return' statement
-            # on each loop, it gets a new grid and updates the destination based on where it moved
             grid = get_grid()
             path = a_star_search(grid, current_location, destination)
             print(f'{path=}')
             grid.printPath(path, destination, current_location)
-            # scanning takes a while, so for each loop, we will try to process 25 steps (max steps to reach destination is 100)
-            steps_to_take = path[0:25]
+            steps_to_take = path[0:RESCAN_INTERVAL]
             print(f"{steps_to_take}=")
             if len(steps_to_take) == 0:
                 return
+
+            if len(detections) > 0 and detections[0].label == "stop sign":
+                print("stop for x seconds")
                 
             px.set_dir_servo_angle(0)
             for step in steps_to_take:
@@ -70,23 +75,23 @@ def main():
             print(f'reorienting from {orientation=} to north')
             if orientation == "WEST":
                 # Move backwards, turn to the right, then go backwards again to try to end up in a similar spot
-                px.backwards(5)
+                px.backward(5)
                 time.sleep(0.5)
                 px.set_dir_servo_angle(30)
                 px.forward(5)
                 time.sleep(0.5)
-                px.backwards(5)
+                px.backward(5)
                 time.sleep(0.5)
                 px.forward(0)
                 # now it should be facing north
             if orientation == "EAST":
                 # Move backwards, turn to the left, then go backwards again to try to end up in a similar spot
-                px.backwards(5)
+                px.backward(5)
                 time.sleep(0.5)
                 px.set_dir_servo_angle(30)
                 px.forward(5)
                 time.sleep(0.5)
-                px.backwards(5)
+                px.backward(5)
                 time.sleep(0.5)
                 px.forward(0)
                 #now it should be facing north
@@ -107,10 +112,10 @@ def main():
 
             # Update the destination based on the bot's last position
             old_destination = destination 
-            destination = (destination[0] + delta_x, destination[1] + delta_y)
+            destination = (destination[0] - delta_x, destination[1] - delta_y)
             print(f'{old_destination=}, {destination=}')
 
-            
+            current_location = origin 
             time.sleep(5)
     finally:
         px.forward(0)
