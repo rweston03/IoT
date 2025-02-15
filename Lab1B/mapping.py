@@ -1,8 +1,6 @@
 from picarx import Picarx
 from time import sleep
 import numpy as np
-from typing import Iterator
-import copy
 import cv2
 
 MAX_ANGLE = 90 # theoretically 90
@@ -19,6 +17,8 @@ def print_map(origin, area):
         for j in range(GRID_SIZE):
             if area[i, j] == 1:
                 map_image[i, j] = [0, 0, 255]
+            elif area[i, j] == 0.5:
+                map_image[i, j] = [100, 0, 150]
             else:
                 map_image[i, j] = [0, 255, 0]
 
@@ -39,6 +39,7 @@ def mark_line(area, p1, p2):
     if dx < MAX_DIFF and dy < MAX_DIFF:
         while True:
             area[y1][x1] = 1
+            add_padding(area, x1, y1)
             if x1 == x2 and y1 == y2:
                 break
             
@@ -52,8 +53,22 @@ def mark_line(area, p1, p2):
                 e += dx
                 y1 += sy
 
+def add_padding(area, x, y):
+    if (x - 1 >= 0) and (area[y][x-1] == 0):
+        area[y][x-1] = 0.5
+
+    if (x + 1 < GRID_SIZE) and (area[y][x+1] == 0):
+        area[y][x+1] = 0.5
+
+    if (y - 1 >= 0) and (area[y-1][x] == 0):
+        area[y-1][x] = 0.5
+
+    if (y + 1 < GRID_SIZE) and (area[y+1][x] == 0):
+        area[y+1][x] = 0.5
+
 def get_mu_distance(angle):
     px.set_cam_pan_angle(angle)
+    print("ANGLE: ", angle)
     while True:
         readings = []
         i = 0
@@ -75,72 +90,10 @@ def get_mu_distance(angle):
         if np.std(readings) < 2:
             return np.mean(readings)
 
-if __name__=='__main__':   
-    get_grid()
-
-# Adding code from Red Blob Games source "Implementation of A*" 
-# found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar
-GridLocation = tuple[int, int]
-
-class SquareGrid:
-    def __init__(self, grid: list[list[int]]):
-        self.width = len(grid[0]) 
-        self.height = len(grid)
-        self.walls: list[GridLocation] = []
-        for row_idx, row in enumerate(grid):
-            for col_idx, value in enumerate(row):
-                if value == 1:
-                    coords = (row_idx, col_idx)
-                    self.walls.append(coords)     
-        self.grid = grid
-
-    def in_bounds(self, id: GridLocation) -> bool:
-        (x, y) = id
-        return 0 <= x < self.width and 0 <= y < self.height
-
-    def passable(self, id: GridLocation) -> bool:
-        return id not in self.walls
-
-    def neighbors(self, id: GridLocation) -> list[GridLocation]:
-        (x, y) = id
-        neighbors = [(x+1, y), (x-1, y), (x, y-1), (x, y+1)] # E W N S
-        # see "Ugly paths" section for an explanation:
-        if (x + y) % 2 == 0: neighbors.reverse() # S N W E
-        results = filter(self.in_bounds, neighbors)
-        results = filter(self.passable, results)
-        return list(results)
-
-    def cost(self, start: GridLocation, end: GridLocation):
-        return 1
-
-    def printGrid(self):
-        output = ""
-        for row_idx, row in enumerate(self.grid):
-            for col_idx, value in enumerate(row):
-                output = output + str(value) + " "
-            output = output + "\n"
-        print(output)
-
-    def printPath(self, path, destination, current_location):
-        gridCopy = copy.deepcopy(self.grid)
-        for coord in path:
-            y = coord[0]
-            x = coord[1]
-            gridCopy[y][x] = 2
-        gridCopy[destination[0]][destination[1]] = 5 # destination marked with 5
-        gridCopy[current_location[0]][current_location[1]] = 4 # current location marked with 4
-        output = ""
-        for row_idx, row in enumerate(gridCopy):
-            for col_idx, value in enumerate(row):
-                output = output + str(value) + " "
-            output = output + "\n"
-        print(output)
-
-
-def get_grid():
-    try: 
+if __name__=='__main__':
+    try:  
         # assume that the entire space is open
-        area = np.zeros((GRID_SIZE, GRID_SIZE), dtype=int)
+        area = np.zeros((GRID_SIZE, GRID_SIZE))
 
         # starting in the middle bottom of grid
         origin = ((int)(GRID_SIZE/2), 0)
@@ -151,6 +104,8 @@ def get_grid():
 
         for angle in angles:
             mu_distance = get_mu_distance(angle)
+            print("MEAN DISTANCE: ", mu_distance)
+            sleep(0.1)
 
             # figure out how far the object is in the x and y directions
             rad_angle = angle * np.pi / 180.
@@ -165,12 +120,11 @@ def get_grid():
 
             if x_coord > 0 and x_coord < GRID_SIZE and y_coord > 0 and y_coord < GRID_SIZE:
                 area[y_coord][x_coord] = 1
+                add_padding(area, x_coord, y_coord)
                 if (prev[0] != -1):
                     mark_line(area, prev, (x_coord, y_coord))
                 prev = (x_coord, y_coord)
 
-        grid = SquareGrid(area)            
-        return grid
 
     finally:
         print("finished mapping")
