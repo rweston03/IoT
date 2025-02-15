@@ -13,7 +13,7 @@ def main():
     try:
         threading.Thread(target=start_object_detection).start()
         current_location = (GRID_SIZE - 1, 50)
-        destination = (0, 99)
+        destination = (0, GRID_SIZE - 1) #Top right of grid
         orientation = "NORTH" # Bot always starts on the bottom middle of the grid facing north
 
         # loop until reaches destination

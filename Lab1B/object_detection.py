@@ -112,10 +112,7 @@ def run(model: str, max_results: int, score_threshold: float,
             detection_result_list.clear()
 
         if detection_frame is not None:
-            try:
-                cv2.imshow('object_detection', detection_frame)
-            except:
-                print(f' could not run imshow because there is no')
+            cv2.imshow('object_detection', detection_frame)
 
         # Stop the program if the ESC key is pressed.
         if cv2.waitKey(1) == 27:
