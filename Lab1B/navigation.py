@@ -5,7 +5,7 @@ import json
 from mapping import get_grid, GRID_SIZE, px
 from routing import a_star_search 
 from object_detection import start_object_detection, detections
-import threading
+import thre]ading
 import time
 
 RESCAN_INTERVAL = 25
@@ -31,9 +31,15 @@ def main():
             if len(steps_to_take) == 0:
                 return
 
+            # Todo: need to see the result from object detection for when there is a stop sign and update the condition accordingly
+            # also need a variable that will make it so that it'll only stop for a stop sign once every  10 seconds to avoid stpping for
+            # the same stop sign  multiple times 
             if len(detections) > 0 and detections[0].label == "stop sign":
                 print("stop for x seconds")
                 
+            # todo: need to improve the turning, it can't turn 90 degrees left/right on a dime so right now when  the path
+            # says to turn right it barely turns left/right at all which will cause it to stray from the path it's supposed to follow
+            # as a result, it will miss the destination
             px.set_dir_servo_angle(0)
             for step in steps_to_take:
                 if orientation == "NORTH":
@@ -71,8 +77,10 @@ def main():
                 current_location = step
             px.forward(0)
 
+
             # Need to reset the orientation so it is always facing north at the end of processing a batch of steps
             print(f'reorienting from {orientation=} to north')
+            # todo: need to check this to  see if this reorient is good enough or if it can be tuned better to make it end up reoriented in the same spot
             if orientation == "WEST":
                 # Move backwards, turn to the right, then go backwards again to try to end up in a similar spot
                 px.backward(5)
@@ -102,10 +110,6 @@ def main():
             #now, since we're going to re scan the grid which means the bot will be at the bottom again, we need to update the destination
             #to be in the new spot based on the last step in the path
 
-            # bot starts at 99, 50
-            # bot moves to x, y
-            # destination was 0,99
-            # new destination is ?
             print(f'bot moved from {origin=} to {last_step=}')
             delta_x = last_step[0] - origin[0]
             delta_y = last_step[1] - origin[1]
@@ -116,17 +120,8 @@ def main():
             print(f'{old_destination=}, {destination=}')
 
             current_location = origin 
-            time.sleep(5)
     finally:
         px.forward(0)
-
-        
-
-        # object = detections[0]
-
-        # if object == "Stop Sign":
-        #     time.sleep(0.5)
-        #     px.forward(POWER)
 
 if __name__ == "__main__":
     main()
