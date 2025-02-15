@@ -63,8 +63,9 @@ def get_mu_distance(angle):
             distance = round(px.ultrasonic.read(), 2)
             print("distance: ", distance)
 
+            # if reading is negative, ignore reading
             if distance < 0:
-                distance = 500
+                continue
 
             readings.append(distance)
             sleep(SLEEP_TIME)
@@ -120,13 +121,14 @@ class SquareGrid:
             output = output + "\n"
         print(output)
 
-    def printPath(self, path):
+    def printPath(self, path, destination, current_location):
         gridCopy = copy.deepcopy(self.grid)
         for coord in path:
-            x = coord[0]
-            y = coord[1]
-
-            gridCopy[x][y] = 2
+            y = coord[0]
+            x = coord[1]
+            gridCopy[y][x] = 2
+        gridCopy[destination[0]][destination[1]] = 5 # destination marked with 5
+        gridCopy[current_location[0]][current_location[1]] = 4 # current location marked with 4
         output = ""
         for row_idx, row in enumerate(gridCopy):
             for col_idx, value in enumerate(row):
@@ -150,22 +152,22 @@ def get_grid():
         for angle in angles:
             mu_distance = get_mu_distance(angle)
 
-        # figure out how far the object is in the x and y directions
-        rad_angle = angle * np.pi / 180.
-        x = (int)(mu_distance*np.sin(rad_angle))
-        y = (int)(mu_distance*np.cos(rad_angle))
+            # figure out how far the object is in the x and y directions
+            rad_angle = angle * np.pi / 180.
+            x = (int)(mu_distance*np.sin(rad_angle))
+            y = (int)(mu_distance*np.cos(rad_angle))
 
 
-        # if the object is in the grid, mark grid space as 1
-        (i, j) = (origin[0] + x, origin[1] + y)
+            # if the object is in the grid, mark grid space as 1
+            (i, j) = (origin[0] + x, origin[1] + y)
 
-        (x_coord, y_coord) = (i, GRID_SIZE - j - 1)
+            (x_coord, y_coord) = (i, GRID_SIZE - j - 1)
 
-        if x_coord > 0 and x_coord < GRID_SIZE and y_coord > 0 and y_coord < GRID_SIZE:
-            area[y_coord][x_coord] = 1
-            if (prev[0] != -1):
-                mark_line(area, prev, (x_coord, y_coord))
-            prev = (x_coord, y_coord)
+            if x_coord > 0 and x_coord < GRID_SIZE and y_coord > 0 and y_coord < GRID_SIZE:
+                area[y_coord][x_coord] = 1
+                if (prev[0] != -1):
+                    mark_line(area, prev, (x_coord, y_coord))
+                prev = (x_coord, y_coord)
 
         grid = SquareGrid(area)            
         return grid

@@ -10,7 +10,7 @@ import time
 def main():
     try:
         threading.Thread(target=start_object_detection).start()
-        current_location = ((int)(GRID_SIZE/2), 0)
+        current_location = (GRID_SIZE - 1, 50)
         destination = (0, 99)
         orientation = "EAST"
 
@@ -19,8 +19,8 @@ def main():
             # on each loop, it gets a new grid and updates the destination based on where it moved
             grid = get_grid()
             path = a_star_search(grid, current_location, destination)
-            grid.printPath(path)
-
+            print(f'{path=}')
+            grid.printPath(path, destination, current_location)
             # scanning takes a while, so for each loop, we will try to process 25 steps (max steps to reach destination is 100)
             steps_to_take = path[0:25]
             print(f"{steps_to_take}=")
