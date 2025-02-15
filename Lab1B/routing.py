@@ -1,7 +1,7 @@
 # Routing - can be done at same time as mapping, needs mapping for testing, needs to be done before navigation
 
 # Adding code from Red Blob Games source "Implementation of A*" 
-# found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar
+# found on https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar, https://www.redblobgames.com/pathfinding/a-star/implementation.py
 # TODO: modify to match our maps when mapping step is done
 from mapping import GridLocation, SquareGrid
 from typing import Protocol, Iterator, Tuple, TypeVar, Optional
