@@ -24,6 +24,7 @@ def main():
             print(f"scanning...")
             origin = (GRID_SIZE - 1, 50)
             grid = get_grid()
+            px.set_cam_pan_angle(0)
             path = a_star_search(grid, current_location, destination)
             print(f'{path=}')
             grid.printPath(path, destination, current_location)
@@ -37,8 +38,9 @@ def main():
                 print("stop for x seconds")
                 
             px.set_dir_servo_angle(0)
+            print('steps_to_take')
+            print(steps_to_take)
             for step in steps_to_take:
-
                 # first check for stop sign
                 for  detection  in  detections:
                     if detection.label == "stop sign":
@@ -47,13 +49,14 @@ def main():
                         if abs(current_time - time_last_stopped_for_stop_sign) >= 10: # stopped for stop sign more than 10 seconds ago
                             px.forward(0) # stop moving
                             time.sleep(3) # wait 3 seconds
-                            px.forward(5) # start moving again
+                            px.forward(1) # start moving again
                             time_last_stopped_for_stop_sign = current_time # update when the last time we stopped for stop sign was
                             break
 
                 # if changing orientation, needs to turn 90 degrees left or right
                 # todo: need to improve the turning for reorient_right and reorient_left, these functions are responsible for making 90 degree turns
                 # and leaving the bot in the same spot
+                print("current orientation", orientation)
                 if orientation == "NORTH":
                     if step[0] == current_location[0] - 1:
                         print("north forward")
@@ -62,6 +65,8 @@ def main():
                         orientation = "WEST"
                         reorient_left()
                     elif step[1] == current_location[1] + 1:
+                        print(step)
+                        print(current_location)
                         print("north to east")
                         orientation = "EAST"
                         reorient_right()
@@ -84,24 +89,26 @@ def main():
                     elif step[1] == current_location[1] - 1:
                         print("west forward")
 
-                
-                px.forward(5)
-                time.sleep(0.25)
+
+                px.forward(1)
+                #TODO - The value in this time sleep needs to be as equivalent to 1 cm per step as possible. For the current
+                #path the value should take the car from the bottom of the map to the top of the map without much space left over at the top
+                time.sleep(0.13)
                 px.set_dir_servo_angle(0)
                 current_location = step
             px.forward(0)
 
 
             # Need to reset the orientation so it is always facing north at the end of processing a batch of steps
-            print(f'reorienting from {orientation=} to north since we finished processing a batch')
-            px.set_dir_servo_angle(0)
-            # todo: need to fine tune this reorientation
-            # if it's oriented west, at the end of the if statement it should basically be facing 90 degrees to the right of where it started and in the same spot as where it started
-            # if it's oriented east, at the end of the if statement it should basically be facing 90 degrees to the left of where it started and in the same spot as where it started
-            if orientation == "WEST":
-                reorient_right()
-            if orientation == "EAST":
-                reorient_left()
+            # ~ print(f'reorienting from {orientation=} to north since we finished processing a batch')
+            # ~ px.set_dir_servo_angle(0)
+            # ~ # todo: need to fine tune this reorientation
+            # ~ # if it's oriented west, at the end of the if statement it should basically be facing 90 degrees to the right of where it started and in the same spot as where it started
+            # ~ # if it's oriented east, at the end of the if statement it should basically be facing 90 degrees to the left of where it started and in the same spot as where it started
+            # ~ if orientation == "WEST":
+                # ~ reorient_right()
+            # ~ if orientation == "EAST":
+                # ~ reorient_left()
 
             # we can't really know for sure, but we'll assume that the navigation so far has taken us to the position of the last step
             last_step = steps_to_take[-1]
@@ -117,6 +124,10 @@ def main():
             old_destination = destination 
             destination = (destination[0] - delta_x, destination[1] - delta_y)
             print(f'{old_destination=}, {destination=}')
+            print(current_location)
+            if old_destination == destination:
+                print('destination reached')
+                break;
 
             current_location = origin 
     finally:
@@ -124,24 +135,60 @@ def main():
 
 def reorient_right():
     # Move backwards, turn to the right, then go backwards again to try to end up in a similar spot
-    px.backward(5)
-    time.sleep(0.5)
+    #px.backward(5)
+    #time.sleep(0.5)
+    print('I should be turned right')
     px.set_dir_servo_angle(30)
-    px.forward(5)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
     time.sleep(0.5)
-    px.backward(5)
+    px.backward(1)
+    time.sleep(1.25)
+    px.set_dir_servo_angle(30)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
     time.sleep(0.5)
+    px.backward(1)
+    time.sleep(1.25)
+    px.set_dir_servo_angle(30)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
+    px.backward(1)
+    #TODO - The value on this time sleep below needs to be enough to bring the car back to it's start point before the turn
+    time.sleep(2.2)
+    px.backward(0)
     px.forward(0)
 
 def reorient_left():
     # Move backwards, turn to the left, then go backwards again to try to end up in a similar spot
-    px.backward(5)
-    time.sleep(0.5)
+    #px.backward(5)
+    #time.sleep(0.5)
+    print('I should be turned left')
     px.set_dir_servo_angle(-30)
-    px.forward(5)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
     time.sleep(0.5)
-    px.backward(5)
+    px.backward(1)
+    time.sleep(1.25)
+    px.set_dir_servo_angle(-30)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
     time.sleep(0.5)
+    px.backward(1)
+    time.sleep(1.25)
+    px.set_dir_servo_angle(-30)
+    px.forward(1)
+    time.sleep(4.25)
+    px.set_dir_servo_angle(0)
+    px.backward(1)
+    #TODO - The value on this time sleep below needs to be enough to bring the car back to it's start point before the turn
+    time.sleep(2.2)
+    px.backward(0)
     px.forward(0)
 if __name__ == "__main__":
     main()
