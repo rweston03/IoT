@@ -78,7 +78,7 @@ def get_mu_distance(angle):
         # take three readings
         while i < 3:
             distance = round(px.ultrasonic.read(), 2)
-            #print("distance: ", distance)
+            print("distance: ", distance)
 
             # if reading is negative, ignore reading
             if distance < 0:
@@ -133,7 +133,7 @@ class SquareGrid:
             for col_idx, value in enumerate(row):
                 output = output + str(value) + " "
             output = output + "\n"
-        #print(output)
+        print(output)
 
     def printPath(self, path, destination, current_location):
         gridCopy = copy.deepcopy(self.grid)
@@ -148,7 +148,7 @@ class SquareGrid:
             for col_idx, value in enumerate(row):
                 output = output + str(value) + " "
             output = output + "\n"
-        #print(output)
+        print(output)
 
 
 def get_grid():
