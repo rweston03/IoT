@@ -154,7 +154,7 @@ class SquareGrid:
 def get_grid():
     try:  
         # assume that the entire space is open
-        area = np.zeros((GRID_SIZE, GRID_SIZE))
+        area = np.zeros((GRID_SIZE, GRID_SIZE), dtype = int)
 
         # starting in the middle bottom of grid
         origin = ((int)(GRID_SIZE/2), 0)
