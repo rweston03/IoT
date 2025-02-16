@@ -1,5 +1,7 @@
 from picarx import Picarx
 from time import sleep
+from typing import Iterator
+import copy
 import numpy as np
 import cv2
 
@@ -91,6 +93,65 @@ def get_mu_distance(angle):
             return np.mean(readings)
 
 if __name__=='__main__':
+    get_grid()
+
+    GridLocation = tuple[int, int]
+    class SquareGrid:
+    def __init__(self, grid: list[list[int]]):
+        self.width = len(grid[0]) 
+        self.height = len(grid)
+        self.walls: list[GridLocation] = []
+        for row_idx, row in enumerate(grid):
+            for col_idx, value in enumerate(row):
+                if value == 1:
+                    coords = (row_idx, col_idx)
+                    self.walls.append(coords)     
+        self.grid = grid
+
+    def in_bounds(self, id: GridLocation) -> bool:
+        (x, y) = id
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    def passable(self, id: GridLocation) -> bool:
+        return id not in self.walls
+
+    def neighbors(self, id: GridLocation) -> list[GridLocation]:
+        (x, y) = id
+        neighbors = [(x+1, y), (x-1, y), (x, y-1), (x, y+1)] # E W N S
+        # see "Ugly paths" section for an explanation:
+        if (x + y) % 2 == 0: neighbors.reverse() # S N W E
+        results = filter(self.in_bounds, neighbors)
+        results = filter(self.passable, results)
+        return list(results)
+
+    def cost(self, start: GridLocation, end: GridLocation):
+        return 1
+
+    def printGrid(self):
+        output = ""
+        for row_idx, row in enumerate(self.grid):
+            for col_idx, value in enumerate(row):
+                output = output + str(value) + " "
+            output = output + "\n"
+        print(output)
+
+    def printPath(self, path, destination, current_location):
+        gridCopy = copy.deepcopy(self.grid)
+        for coord in path:
+            y = coord[0]
+            x = coord[1]
+            gridCopy[y][x] = 2
+        gridCopy[destination[0]][destination[1]] = 5 # destination marked with 5
+        gridCopy[current_location[0]][current_location[1]] = 4 # current location marked with 4
+        output = ""
+        for row_idx, row in enumerate(gridCopy):
+            for col_idx, value in enumerate(row):
+                output = output + str(value) + " "
+            output = output + "\n"
+        print(output)
+
+
+def get_grid():
     try:  
         # assume that the entire space is open
         area = np.zeros((GRID_SIZE, GRID_SIZE))
@@ -125,7 +186,8 @@ if __name__=='__main__':
                     mark_line(area, prev, (x_coord, y_coord))
                 prev = (x_coord, y_coord)
 
-
+        grid = SquareGrid(area)            
+        return grid
     finally:
         print("finished mapping")
         print_map(origin, area)
