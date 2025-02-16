@@ -93,7 +93,7 @@ def main():
                 px.forward(1)
                 #TODO - The value in this time sleep needs to be as equivalent to 1 cm per step as possible. For the current
                 #path the value should take the car from the bottom of the map to the top of the map without much space left over at the top
-                time.sleep(0.13)
+                time.sleep(0.179)
                 px.set_dir_servo_angle(0)
                 current_location = step
             px.forward(0)
@@ -132,6 +132,7 @@ def main():
             current_location = origin 
     finally:
         px.forward(0)
+        return
 
 def reorient_right():
     # Move backwards, turn to the right, then go backwards again to try to end up in a similar spot
@@ -144,21 +145,21 @@ def reorient_right():
     px.set_dir_servo_angle(0)
     time.sleep(0.5)
     px.backward(1)
-    time.sleep(1.25)
+    time.sleep(1.2)
     px.set_dir_servo_angle(30)
     px.forward(1)
     time.sleep(4.25)
     px.set_dir_servo_angle(0)
     time.sleep(0.5)
     px.backward(1)
-    time.sleep(1.25)
+    time.sleep(1.2)
     px.set_dir_servo_angle(30)
     px.forward(1)
-    time.sleep(4.25)
+    time.sleep(3.84)
     px.set_dir_servo_angle(0)
     px.backward(1)
     #TODO - The value on this time sleep below needs to be enough to bring the car back to it's start point before the turn
-    time.sleep(2.2)
+    time.sleep(2.6)
     px.backward(0)
     px.forward(0)
 
@@ -173,21 +174,21 @@ def reorient_left():
     px.set_dir_servo_angle(0)
     time.sleep(0.5)
     px.backward(1)
-    time.sleep(1.25)
+    time.sleep(1.2)
     px.set_dir_servo_angle(-30)
     px.forward(1)
     time.sleep(4.25)
     px.set_dir_servo_angle(0)
     time.sleep(0.5)
     px.backward(1)
-    time.sleep(1.25)
+    time.sleep(1.2)
     px.set_dir_servo_angle(-30)
     px.forward(1)
-    time.sleep(4.25)
+    time.sleep(3.84)
     px.set_dir_servo_angle(0)
     px.backward(1)
     #TODO - The value on this time sleep below needs to be enough to bring the car back to it's start point before the turn
-    time.sleep(2.2)
+    time.sleep(2.6)
     px.backward(0)
     px.forward(0)
 if __name__ == "__main__":
