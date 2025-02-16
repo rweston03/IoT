@@ -95,8 +95,8 @@ def get_mu_distance(angle):
 if __name__=='__main__':
     get_grid()
 
-    GridLocation = tuple[int, int]
-    class SquareGrid:
+GridLocation = tuple[int, int]
+class SquareGrid:
     def __init__(self, grid: list[list[int]]):
         self.width = len(grid[0]) 
         self.height = len(grid)
