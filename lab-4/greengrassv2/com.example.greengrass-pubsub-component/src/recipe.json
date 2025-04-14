@@ -1,15 +1,15 @@
 {
   "RecipeFormatVersion": "2020-01-25",
   "ComponentName": "MY_COMPONENT_NAME",
-  "ComponentVersion": "0.0.2",
+  "ComponentVersion": "NEXT_PATCH",
   "ComponentDescription": "CS437 IoT Lab 4",
   "ComponentPublisher": "Ifra Baig",
   "ComponentConfiguration": {
     "DefaultConfiguration": {
       "GGV2PubSubSdkConfig": {
         "base-pubsub-topic" : "MY_COMPONENT_NAME",
-        "ipc-subscribe-topics" : ["ipc/my-app/broadcast", "ipc/my-app/error"],
-        "mqtt-subscribe-topics" : ["mqtt/my-app/broadcast", "mqtt/my-app/error", "iot/Vehicle_+"]
+        "ipc-subscribe-topics" : [],
+        "mqtt-subscribe-topics" : ["vehicle/emission/data"]
       },
       "accessControl": {
         "aws.greengrass.ipc.pubsub": {
@@ -70,7 +70,7 @@
       "Lifecycle": {
         "Install" : {
           "Timeout" : 300,
-          "Script" : "python3 -m pip install awsgreengrasspubsubsdk"
+          "Script" : "python3 -m pip install pandas && python3 -m pip install awsgreengrasspubsubsdk"
         },
         "Run": {
           "Script": "python3 -u {artifacts:decompressedPath}/src/main.py '{configuration:/GGV2PubSubSdkConfig}'",

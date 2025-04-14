@@ -8,7 +8,7 @@
       },
       "publish": {
         "bucket": "aws-greengrass-component-artefacts",
-        "region": "us-east-2"
+        "region": "us-east-1"
       }
     }
   },

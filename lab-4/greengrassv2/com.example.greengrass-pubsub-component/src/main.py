@@ -27,6 +27,7 @@ from awsgreengrasspubsubsdk.pubsub_client import AwsGreengrassPubSubSdkClient
 # Example user defined message handling classes
 from pubsub_message_handlers.my_system_message_handler import MySystemMessageHandler
 from pubsub_message_handlers.my_sensor_message_handler import MySensorMessageHandler
+from pubsub_message_handlers.my_emission_message_handler import MyEmissionMessageHandler
 
 # Config the logger.
 log = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ class MyAwsGreengrassV2Component():
         
         pubsub_base_topic = ggv2_component_config['base-pubsub-topic']
         log.info('PubSub Base Topic: {}'.format(pubsub_base_topic))
+        # pubsub_base_topic: mqtt/my-app/broadcast
         
         ipc_subscribe_topics = ggv2_component_config['ipc-subscribe-topics']
         log.info('IPC Custom Subscribe Topics: {}'.format(ipc_subscribe_topics))
@@ -74,6 +76,12 @@ class MyAwsGreengrassV2Component():
         self.my_sensor_message_handler = MySensorMessageHandler(self.publish_message, self.publish_error, self.message_formatter)
         self.pubsub_client.register_message_handler(self.my_sensor_message_handler)
         log.info('Initialising and registering MySensorMessageHandler Class - Complete')
+
+        # Message handler for emission requests
+        log.info('Initialising and registering MyEmissionMessageHandler Class')
+        self.my_emission_message_handler = MyEmissionMessageHandler(self.publish_message, self.publish_error, self.message_formatter)
+        self.pubsub_client.register_message_handler(self.my_emission_message_handler)
+        log.info('Initialising and registering MyEmissionMessageHandler Class - Complete')
 
         # Activate the MQTT and IPC PubSub Channels, can active one, either or both.
         log.info('Activating AWS Greengrass PubSub SDK IPC and MQTT Protocols')
@@ -142,7 +150,6 @@ class MyAwsGreengrassV2Component():
 if __name__ == "__main__":
 
     try:
-
         # Parse config from component recipe into sys.argv[1] 
         ggv2_component_config = sys.argv[1]
         ggv2_component_config = json.loads(ggv2_component_config)
